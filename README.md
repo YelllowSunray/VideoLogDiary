@@ -1,36 +1,67 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# YourVideoLog
 
-## Getting Started
+Record a 5-minute video log entry every evening. Each video is uploaded to Firebase Storage and automatically transcribed (searchable text).
 
-First, run the development server:
+## Features
+
+- **Google sign-in** via Firebase Auth
+- **Record up to 5 minutes** of video (camera + microphone)
+- **Upload** to Firebase Storage
+- **Transcription** via AssemblyAI (audio extracted from video)
+- **Past entries** listed with expandable video + transcript
+
+## Setup
+
+### 1. Firebase
+
+- Create a project at [Firebase Console](https://console.firebase.google.com/) (or use the one you already have).
+- Enable **Authentication** → Sign-in method → **Google**.
+- Create a **Firestore** database.
+- Create **Storage** and set your region.
+- Optional: copy `.env.local.example` to `.env.local` and set `NEXT_PUBLIC_*` if you want to override the default Firebase config.
+
+### 2. Deploy security rules
+
+In Firebase Console:
+
+- **Firestore** → Rules: paste the contents of `firestore.rules` and publish.
+- **Storage** → Rules: paste the contents of `storage.rules` and publish.
+
+### 3. Transcription (AssemblyAI)
+
+- Sign up at [AssemblyAI](https://www.assemblyai.com/) and get an API key.
+- Add to `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+ASSEMBLYAI_API_KEY=your_api_key_here
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without this key, upload and listing still work; transcription will fail with a clear message and the entry will show an error state.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Run the app
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000). Sign in with Google, then go to **Open diary** to record and view entries.
 
-To learn more about Next.js, take a look at the following resources:
+## Project structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `app/page.tsx` – Landing / sign-in
+- `app/diary/page.tsx` – Diary list + record flow
+- `components/VideoRecorder.tsx` – 5-min max recording UI
+- `components/DiaryEntryCard.tsx` – Entry row with video + transcript
+- `app/api/transcribe/route.ts` – AssemblyAI transcription API
+- `lib/firebase.ts` – Firebase client config
+- `lib/diary.ts` – Firestore + Storage helpers
+- `lib/types.ts` – `DiaryEntry` type
+- `contexts/AuthContext.tsx` – Auth state + Google sign-in
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tech stack
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Next.js 16, React 19, Tailwind CSS 4
+- Firebase (Auth, Firestore, Storage)
+- AssemblyAI for transcription
+# VideoLogDiary
